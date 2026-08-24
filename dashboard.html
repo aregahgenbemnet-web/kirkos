@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ቂርቆስ ክፍለ ከተማ - ዳሽቦርድ</title>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:wght@300;400;500;600;700&family=Noto+Sans+Ethiopic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- ===== SIDEBAR ===== -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i data-lucide="layout-dashboard" class="logo-icon"></i>
+                <h2>ቂርቆስ</h2>
+            </div>
+            <div class="sidebar-item active" id="overviewBtn">
+                <i data-lucide="home" class="icon"></i>
+                <span class="label-text">
+                    <span class="amharic">Overview</span>
+                    <span class="english">Dashboard</span>
+                </span>
+            </div>
+            <div id="categoriesContainer"></div>
+        </nav>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="main-content">
+            <!-- ===== TOP BAR ===== -->
+            <div class="top-bar">
+                <div class="welcome">
+                    <h1 id="pageTitle">📊 Dashboard Overview</h1>
+                    <p id="pageSubtitle">Welcome back! Here's what's happening.</p>
+                </div>
+                <div class="user-info">
+                    <div class="avatar">👤</div>
+                    <span id="userName">Admin</span>
+                    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+                </div>
+            </div>
+
+            <!-- ===== CONTENT AREA ===== -->
+            <div class="glass-card" id="contentArea">
+                <!-- Default Overview Content -->
+                <div id="overviewContent">
+                    <h3>📁 Welcome to Kirikos Sub-City Dashboard</h3>
+                    <p>Select a category from the sidebar to view details.</p>
+                    <div class="meta">
+                        <p>📌 36 categories available • Last updated: Today</p>
+                    </div>
+                </div>
+
+                <!-- Bento Content -->
+                <div id="bentoContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;">
+                        <span class="am">💬 የዕቅድ አፈጻጸም ውይይት</span>
+                        <span class="en">Plan Performance Discussion</span>
+                    </div>
+                    <p style="margin-bottom:8px;font-size:12px;color:rgba(26,26,46,0.3);">
+                        ማስታወሻ ወይም ስራ ለማስተካከል ይጫኑ · Click Notes or To-Do to expand
+                    </p>
+                    
+                    <div class="discussion-tools" id="discussionTools">
+                        <div class="tool-card" id="notesCard">
+                            <h4><i data-lucide="notebook" style="width:14px;height:14px;display:inline-block;margin-right:4px;"></i> <span class="bilingual"><span class="am">ማስታወሻ</span><span class="en">Notes</span></span></h4>
+                            <textarea id="notesArea" placeholder="ማስታወሻ ለመጻፍ ይጫኑ / Click to write notes..." readonly></textarea>
+                        </div>
+                        <div class="tool-card" id="todoCard">
+                            <h4><i data-lucide="check-square" style="width:14px;height:14px;display:inline-block;margin-right:4px;"></i> <span class="bilingual"><span class="am">ስራዎች</span><span class="en">To-Do</span></span></h4>
+                            <ul class="todo-list" id="todoList">
+                                <li><input type="checkbox" disabled><span class="todo-text">Review Q1 performance</span></li>
+                                <li><input type="checkbox" disabled><span class="todo-text">Prepare action items</span></li>
+                            </ul>
+                            <div class="todo-add">
+                                <input type="text" placeholder="ስራ ያክሉ / Add task..." disabled>
+                                <button disabled>+ Add</button>
+                            </div>
+                        </div>
+                        <div class="tool-card" style="cursor:default;">
+                            <h4><i data-lucide="clock" style="width:14px;height:14px;display:inline-block;margin-right:4px;"></i> <span class="bilingual"><span class="am">ሰዓት ቆጣሪ</span><span class="en">Timer</span></span></h4>
+                            <div class="timer-display" id="timerDisplay">00:00</div>
+                            <div class="timer-controls">
+                                <button id="timerStart">▶ <span class="bilingual"><span class="am">ጀምር</span><span class="en">Start</span></span></button>
+                                <button id="timerPause">⏸ <span class="bilingual"><span class="am">አቁም</span><span class="en">Pause</span></span></button>
+                                <button id="timerReset">⟳ <span class="bilingual"><span class="am">ዳግም ጀምር</span><span class="en">Reset</span></span></button>
+                            </div>
+                        </div>
+                        <div class="calendar-card" id="calendarCard">
+                            <h4><i data-lucide="calendar" style="width:14px;height:14px;display:inline-block;margin-right:4px;"></i> <span class="bilingual"><span class="am">የኢትዮጵያ ቀን መቁጠሪያ</span><span class="en">Ethiopian Calendar</span></span></h4>
+                            <div class="ethiopian-calendar" id="ethiopianCalendar">
+                                <div class="calendar-header">
+                                    <button id="prevMonth">‹</button>
+                                    <span id="monthYearDisplay">መስከረም 2016</span>
+                                    <button id="nextMonth">›</button>
+                                </div>
+                                <div class="calendar-weekdays">
+                                    <span>እሑድ</span><span>ሰኞ</span><span>ማክሰ</span>
+                                    <span>ረቡዕ</span><span>ሐሙስ</span><span>አርብ</span><span>ቅዳሜ</span>
+                                </div>
+                                <div class="calendar-days" id="calendarDays"></div>
+                                <div class="selected-date-display" id="selectedDateDisplay">ምንም ቀን አልተመረጠም / No date selected</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-title">📈 <span class="bilingual"><span class="am">ወርሃዊ ውይይቶች አጠቃላይ እይታ</span><span class="en">Monthly Discussions Overview</span></span></div>
+                        <div class="chart-wrapper" id="chartWrapper"></div>
+                        <div class="chart-legend">
+                            <div class="chart-legend-item">
+                                <span class="line-sample gold"></span> <span class="bilingual"><span class="am">ጠቅላላ ውይይቶች</span><span class="en">Total Discussions</span></span>
+                            </div>
+                            <div class="chart-legend-item">
+                                <span class="line-sample green"></span> <span class="bilingual"><span class="am">የተጠናቀቁ</span><span class="en">Completed</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                                <!-- Report Content (Kanban Board) -->
+                <div id="reportContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:12px;">
+                        <span class="am">📊 ሪፖርት / የስራ አመራር ሰሌዳ</span>
+                        <span class="en">Report / Task Management Board</span>
+                    </div>
+                    
+                    <div class="kanban-controls" style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center;">
+                        <button id="saveKanbanBtn" style="background:rgba(255,215,150,0.12); border:1px solid rgba(255,215,150,0.15); color:#ffd796; border-radius:8px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:0.2s;">
+                            💾 እንደ ፋይል አስቀምጥ / Save as .txt
+                        </button>
+                    </div>
+
+                    <div class="kanban-board" id="kanbanBoard" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:16px;">
+                        <!-- Column 1: To Do -->
+                        <div class="kanban-column" data-column="todo">
+                            <div class="kanban-column-header">
+                                <span class="column-title">📝 ለመስራት / To Do</span>
+                                <span class="column-count" id="todoCount">0</span>
+                                <button class="add-card-btn" data-column="todo" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#fff; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;">+</button>
+                            </div>
+                            <div class="kanban-cards" id="todoCards"></div>
+                        </div>
+
+                        <!-- Column 2: In Progress -->
+                        <div class="kanban-column" data-column="progress">
+                            <div class="kanban-column-header">
+                                <span class="column-title">⏳ በሂደት ላይ / In Progress</span>
+                                <span class="column-count" id="progressCount">0</span>
+                                <button class="add-card-btn" data-column="progress" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#fff; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;">+</button>
+                            </div>
+                            <div class="kanban-cards" id="progressCards"></div>
+                        </div>
+
+                        <!-- Column 3: Under Review -->
+                        <div class="kanban-column" data-column="review">
+                            <div class="kanban-column-header">
+                                <span class="column-title">🔍 በግምገማ ላይ / Under Review</span>
+                                <span class="column-count" id="reviewCount">0</span>
+                                <button class="add-card-btn" data-column="review" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#fff; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;">+</button>
+                            </div>
+                            <div class="kanban-cards" id="reviewCards"></div>
+                        </div>
+
+                        <!-- Column 4: Completed -->
+                        <div class="kanban-column" data-column="completed">
+                            <div class="kanban-column-header">
+                                <span class="column-title">✅ ተጠናቅቋል / Completed</span>
+                                <span class="column-count" id="completedCount">0</span>
+                                <button class="add-card-btn" data-column="completed" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#fff; border-radius:50%; width:24px; height:24px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;">+</button>
+                            </div>
+                            <div class="kanban-cards" id="completedCards"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Reports / Notebook -->
+                <div id="additionalReportsContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;">
+                        <span class="am">📓 ተጨማሪ ሪፖርቶች / ማስታወሻ ደብተር</span>
+                        <span class="en">Additional Reports / Notebook</span>
+                    </div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">
+                        ማስታወሻዎችን ይጻፉ እና ያስቀምጡ · Write and save your notes
+                    </p>
+                    <div class="notebook-controls">
+                        <button class="btn-notebook" id="newNotebookEntryBtn"><i data-lucide="pen-square" style="width:14px;height:14px;"></i><span class="bilingual"><span class="am">አዲስ ማስታወሻ</span><span class="en">New Note</span></span></button>
+                        <input type="text" id="notebookSearch" placeholder="🔍 ፈልግ / Search notes...">
+                        <select id="notebookFilter">
+                            <option value="all">ሁሉም / All</option>
+                            <option value="internal">ውስጣዊ / Internal</option>
+                            <option value="external">ውጫዊ / External</option>
+                            <option value="chart">ገበታ / Chart</option>
+                        </select>
+                    </div>
+                    <div class="notebook-container" id="notebookContainer"></div>
+                    <div id="notebookEmpty" class="notebook-empty hidden">
+                        <i data-lucide="file-text"></i>
+                        <span class="bilingual"><span class="am">ምንም ማስታወሻዎች የሉም</span><span class="en">No notes found</span></span>
+                    </div>
+                </div>
+
+                <!-- Scorecard -->
+                <div id="scorecardContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;">
+                        <span class="am">📊 ስኮር ካርድ/BSC/ እና ካስኬዲንግ</span>
+                        <span class="en">Scorecard/BSC & Cascading</span>
+                    </div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">
+                        የአፈጻጸም አስተዳደር ስርዓት · Performance management system
+                    </p>
+                    <div class="scorecard-controls">
+                        <select id="scorecardPeriod">
+                            <option value="q1">ሩብ 1 / Q1 2026</option>
+                            <option value="q2" selected>ሩብ 2 / Q2 2026</option>
+                            <option value="q3">ሩብ 3 / Q3 2026</option>
+                            <option value="q4">ሩብ 4 / Q4 2026</option>
+                        </select>
+                        <select id="scorecardView">
+                            <option value="dashboard">ዳሽቦርድ / Dashboard</option>
+                            <option value="cascading">ካስኬዲንግ / Cascading</option>
+                            <option value="both" selected>ሁለቱም / Both</option>
+                        </select>
+                        <button class="btn-scorecard" id="addKpiBtn"><i data-lucide="plus" style="width:14px;height:14px;"></i><span class="bilingual"><span class="am">አዲስ KPI</span><span class="en">New KPI</span></span></button>
+                        <button class="btn-scorecard" id="addGoalBtn" style="background:rgba(37,99,235,0.08);border-color:rgba(37,99,235,0.12);color:#2563eb;"><i data-lucide="target" style="width:14px;height:14px;"></i><span class="bilingual"><span class="am">አዲስ ግብ</span><span class="en">New Goal</span></span></button>
+                    </div>
+                    <div class="scorecard-container" id="scorecardContainer"></div>
+                </div>
+
+                <!-- All other category sections -->
+                <div id="monthlyPartnerContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">🤝 ወርታማ ሴኞ/አብሮነት</span><span class="en">Monthly Partnership Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የወርሃዊ የአጋርነት መረጃ · Monthly partnership information</p>
+                    <div class="section-container" id="monthlyPartnerContainer"></div>
+                </div>
+
+                <div id="externalMonitorContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">🔍 የውጭ ክትትል ግብረ-መልስ</span><span class="en">External Monitoring Feedback</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የውጭ ክትትል ግብረ-መልሶች · External monitoring feedback</p>
+                    <div class="section-container" id="externalMonitorContainer"></div>
+                </div>
+
+                <div id="woredaContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">🏛️ የወረዳዎች ዕቅድና ሪፖርት</span><span class="en">Woreda/District Plan & Report</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የወረዳዎች ዕቅድ እና ሪፖርቶች · Woreda/District plans and reports</p>
+                    <div class="section-container" id="woredaContainer"></div>
+                </div>
+
+                <div id="knowledgeContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📚 ተቋማዊ የአወቀት አስተዳደር</span><span class="en">Institutional Knowledge Management</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የተቋማዊ እውቀት ሰነዶች እና መረጃዎች · Institutional knowledge documents</p>
+                    <div class="section-container" id="knowledgeContainer"></div>
+                </div>
+
+                <div id="networkingContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">🔗 የእርስ በርስ መገናኘቢ መረጃ</span><span class="en">Inter-relations/Networking Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የእርስ በርስ ግንኙነቶች እና አውታረ መረብ · Inter-relations and networking</p>
+                    <div class="section-container" id="networkingContainer"></div>
+                </div>
+
+                <div id="incomeContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">💰 የገቢ መረጃ</span><span class="en">Income Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የገቢ መረጃ እና አስተዳደር · Income information and management</p>
+                    <div class="section-container" id="incomeContainer"></div>
+                </div>
+
+                <div id="experienceContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">💡 የልምድ ልውውጥ መረጃ</span><span class="en">Experience-Sharing Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የልምድ ልውውጥ መረጃ እና ትምህርቶች · Experience-sharing information</p>
+                    <div class="section-container" id="experienceContainer"></div>
+                </div>
+
+                <div id="ngoContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">🌍 የሲማድ/NGO/ መረጃ</span><span class="en">NGO Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የኤንጂኦ መረጃ እና ትብብር · NGO information and collaboration</p>
+                    <div class="section-container" id="ngoContainer"></div>
+                </div>
+
+                <div id="planContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📋 ዕቅድ</span><span class="en">Plan</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የዕቅድ ሰነዶች እና መረጃዎች · Plan documents and information</p>
+                    <div class="section-container" id="planContainer"></div>
+                </div>
+
+                <div id="additionalPlansContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📑 ተጨማሪ ዕቅዶች</span><span class="en">Additional Plans</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">ተጨማሪ የዕቅድ ሰነዶች · Additional plan documents</p>
+                    <div class="section-container" id="additionalPlansContainer"></div>
+                </div>
+
+                <div id="bprContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📊 BPR & BSC ጥናት</span><span class="en">BPR & BSC Study</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የBPR እና BSC ጥናት ሰነዶች · BPR and BSC study documents</p>
+                    <div class="section-container" id="bprContainer"></div>
+                </div>
+
+                <div id="publicRelationsContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📢 የህዝብ ክንፍ ዕቅድና ሪፖርት</span><span class="en">Public Relations Plan & Report</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የህዝብ ግንኙነት ዕቅድ እና ሪፖርቶች · Public relations plans and reports</p>
+                    <div class="section-container" id="publicRelationsContainer"></div>
+                </div>
+
+                <div id="financeContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">💰 የመ/ፋይናንስ/አስ/ መረጃ</span><span class="en">Finance/Admin Department Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የፋይናንስ እና አስተዳደር መረጃ · Finance and administration information</p>
+                    <div class="section-container" id="financeContainer"></div>
+                </div>
+
+                <div id="budgetContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📊 የበጀት መረጃ</span><span class="en">Budget Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የበጀት መረጃ እና ሰነዶች · Budget information and documents</p>
+                    <div class="section-container" id="budgetContainer"></div>
+                </div>
+
+                <div id="findingsContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">🔍 የግኝት መረጃ</span><span class="en">Findings Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የግምገማ ግኝቶች መረጃ · Assessment findings information</p>
+                    <div class="section-container" id="findingsContainer"></div>
+                </div>
+
+                <div id="auditContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📋 የኦዲት መረጃ</span><span class="en">Audit Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የኦዲት መረጃ እና ሪፖርቶች · Audit information and reports</p>
+                    <div class="section-container" id="auditContainer"></div>
+                </div>
+
+                <div id="monitoringContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📊 የክትትልና ድጋፍ መረጃዎች</span><span class="en">Monitoring & Support Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የክትትል እና ድጋፍ መረጃ · Monitoring and support information</p>
+                    <div class="section-container" id="monitoringContainer"></div>
+                </div>
+
+                <div id="trainingContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">🎓 የስልጠና መረጃዎች</span><span class="en">Training Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የስልጠና መረጃ እና ፕሮግራሞች · Training information and programs</p>
+                    <div class="section-container" id="trainingContainer"></div>
+                </div>
+
+                <div id="peerContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">🤝 አቻ ለአቻ ፍረም</span><span class="en">Peer-to-Peer Forum</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የአቻ ለአቻ ፍረም መረጃ · Peer-to-peer forum information</p>
+                    <div class="section-container" id="peerContainer"></div>
+                </div>
+
+                <div id="sdpContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📊 SDP and OP ዕቅድና ሪፖርት</span><span class="en">SDP & OP Plan & Report</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የSDP እና OP ዕቅድ እና ሪፖርቶች · SDP and OP plans and reports</p>
+                    <div class="section-container" id="sdpContainer"></div>
+                </div>
+
+                <div id="standardContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📋 ስታንዳርድ ገጽጽር ሪፖርት</span><span class="en">Standard Indicator Report</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የስታንዳርድ ገጽጽር ሪፖርቶች · Standard indicator reports</p>
+                    <div class="section-container" id="standardContainer"></div>
+                </div>
+
+                <div id="satisfactionContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">😊 የተገልጋይ እርካታ</span><span class="en">Customer Satisfaction</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የተገልጋይ እርካታ ጥናት እና ሪፖርቶች · Customer satisfaction surveys</p>
+                    <div class="section-container" id="satisfactionContainer"></div>
+                </div>
+
+                <div id="complaintContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📝 የቅሬታ መረጃ</span><span class="en">Complaint Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የቅሬታ መረጃ እና አስተዳደር · Complaint information and management</p>
+                    <div class="section-container" id="complaintContainer"></div>
+                </div>
+
+                <div id="capitalContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">🏗️ የመ/ካፒታል ፕሮጀክት መረጃ</span><span class="en">Capital Project Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የካፒታል ፕሮጀክቶች መረጃ · Capital projects information</p>
+                    <div class="section-container" id="capitalContainer"></div>
+                </div>
+
+                <div id="integratedContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📋 የቅንጅታዊ አሰራር ሰነድ</span><span class="en">Integrated Work-Process Document</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የቅንጅታዊ አሰራር ሰነዶች · Integrated work-process documents</p>
+                    <div class="section-container" id="integratedContainer"></div>
+                </div>
+
+                <div id="trustContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">💬 እምነታዊ አስተያየት</span><span class="en">Trust/Reliability Feedback</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የእምነት እና አስተማማኝነት አስተያየቶች · Trust and reliability feedback</p>
+                    <div class="section-container" id="trustContainer"></div>
+                </div>
+
+                <div id="modernizationContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">⚡ ተቋማዊ የማዘመን ዕቅድና ሪፖርት</span><span class="en">Institutional Modernization Plan & Report</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የተቋማዊ ማዘመን ዕቅድ እና ሪፖርቶች · Institutional modernization plans</p>
+                    <div class="section-container" id="modernizationContainer"></div>
+                </div>
+
+                <div id="standardizationContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📏 የስታንዳርዳይዜሽን ዕቅድ ሪፖርት</span><span class="en">Standardization/Reform Work Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የስታንዳርዳይዜሽን እና ሪፎርም መረጃ · Standardization and reform information</p>
+                    <div class="section-container" id="standardizationContainer"></div>
+                </div>
+
+                <div id="employeeContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">👥 ሰራተኛ የመደገፍና የማንሳሳት መረጃ</span><span class="en">Employee Support & Motivation Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የሰራተኛ ድጋፍ እና ማንሳሳት መረጃ · Employee support and motivation</p>
+                    <div class="section-container" id="employeeContainer"></div>
+                </div>
+
+                <div id="balanceContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">⚖️ የፈጻሚ እና የወረዳዎች ሚዛና መረጃ</span><span class="en">Implementer/Woreda Balance Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የፈጻሚ እና የወረዳዎች ሚዛና · Implementer and woreda balance information</p>
+                    <div class="section-container" id="balanceContainer"></div>
+                </div>
+
+                <div id="greenContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">🌱 ማዕድ ማጋራት/አረንዴ አሻራ</span><span class="en">Green Footprint/Multi-Sector Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የአረንዴ አሻራ እና ማዕድ ማጋራት · Green footprint and multi-sector information</p>
+                    <div class="section-container" id="greenContainer"></div>
+                </div>
+
+                <div id="sectorContent" class="hidden">
+                    <div class="bilingual" style="margin-bottom:4px;"><span class="am">📅 የዘርፍ ስብሰባ መረጃ</span><span class="en">Sector Meeting Info</span></div>
+                    <p style="margin-bottom:12px;font-size:12px;color:rgba(26,26,46,0.3);">የዘርፍ ስብሰባ መረጃ እና ማስታወሻዎች · Sector meeting information</p>
+                    <div class="section-container" id="sectorContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box" id="modalBox">
+            <h3 id="modalTitle">📝 Details</h3>
+            <div id="modalBody"></div>
+            <div class="modal-actions">
+                <button class="modal-close-btn" id="modalCloseBtn">✕ ዝጋ / Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
